@@ -14,14 +14,14 @@ A secure, minimal, and user-friendly 2FA/TOTP CLI manager for Linux, built with 
 ### 1. Build from source
 Requires [Rust](https://www.rust-lang.org) and Cargo.
 
-git clone https://github.com
-cd SafeLocked
+git clone https://github.com  
+cd SafeLocked  
 cargo build --release
 
 ### 2. Install to PATH
 To run `safelocked` from anywhere in your terminal, move the binary to your local bin:
 
-sudo cp target/release/safelocked /usr/local/bin/
+sudo cp target/release/safelocked /usr/local/bin/  
 sudo chmod +x /usr/local/bin/safelocked
 
 ## Usage Guide
