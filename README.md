@@ -96,16 +96,22 @@ Watch a code in real time:
 safelocked watch Google
 ```
 
-Lock vault:
+Rename a service:
 
 ```bash
-safelocked lock
+safelocked rename Google Gmail
 ```
 
 Remove a service:
 
 ```bash
 safelocked remove Google
+```
+
+Lock vault:
+
+```bash
+safelocked lock
 ```
 
 Delete vault and stop agent:
