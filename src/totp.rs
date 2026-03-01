@@ -2,12 +2,10 @@ use std::time::SystemTime;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 pub fn generate_code(secret_str: &str) -> Option<String> {
-    let mut secret_bytes = Secret::Encoded(secret_str.to_string())
-        .to_bytes()
-        .unwrap_or_else(|_| secret_str.as_bytes().to_vec());
+    let secret_bytes = Secret::Encoded(secret_str.to_string()).to_bytes().ok()?;
 
     if secret_bytes.len() < 16 {
-        secret_bytes.resize(16, 0);
+        return None;
     }
 
     let totp = match TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes) {

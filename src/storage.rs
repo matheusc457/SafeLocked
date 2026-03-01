@@ -45,7 +45,7 @@ impl Vault {
         serde_json::to_vec(self).expect("Failed to serialize vault")
     }
 
-    pub fn deserialize(data: &[u8]) -> Self {
-        serde_json::from_slice(data).expect("Failed to deserialize vault")
+    pub fn deserialize(data: &[u8]) -> Option<Self> {
+        serde_json::from_slice(data).ok()
     }
 }

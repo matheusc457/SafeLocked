@@ -140,7 +140,7 @@ fn handle_connection(stream: UnixStream, key: &[u8; 32]) -> bool {
 pub fn load_vault(key: &[u8; 32]) -> Option<Vault> {
     let data = Vault::load_from_disk().ok()?;
     let decrypted = crypto::decrypt(&data[32..], key)?;
-    Some(Vault::deserialize(&decrypted))
+    Vault::deserialize(&decrypted)
 }
 
 /// Encrypts and saves the vault using the key from the agent.

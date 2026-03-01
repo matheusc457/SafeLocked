@@ -125,7 +125,18 @@ fn main() {
                 println!("{}", "Error: Secret cannot be empty.".red().bold());
                 return;
             }
-            let mut vault = agent::load_vault(&key).expect("Failed to load vault");
+            let mut vault = match agent::load_vault(&key) {
+                Some(v) => v,
+                None => {
+                    println!(
+                        "{}",
+                        "Error: Vault is corrupted or could not be read."
+                            .red()
+                            .bold()
+                    );
+                    return;
+                }
+            };
             vault.items.push(TwoFactorItem {
                 name: name.clone(),
                 secret: secret.trim().to_string(),
@@ -142,7 +153,18 @@ fn main() {
                     return;
                 }
             };
-            let vault = agent::load_vault(&key).expect("Failed to load vault");
+            let vault = match agent::load_vault(&key) {
+                Some(v) => v,
+                None => {
+                    println!(
+                        "{}",
+                        "Error: Vault is corrupted or could not be read."
+                            .red()
+                            .bold()
+                    );
+                    return;
+                }
+            };
             println!(
                 "\n{:<20} {:<10} {:<10}",
                 "SERVICE".bold(),
@@ -232,7 +254,18 @@ fn main() {
                     return;
                 }
             };
-            let mut vault = agent::load_vault(&key).expect("Failed to load vault");
+            let mut vault = match agent::load_vault(&key) {
+                Some(v) => v,
+                None => {
+                    println!(
+                        "{}",
+                        "Error: Vault is corrupted or could not be read."
+                            .red()
+                            .bold()
+                    );
+                    return;
+                }
+            };
             let original_len = vault.items.len();
             vault
                 .items
