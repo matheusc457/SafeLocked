@@ -14,7 +14,7 @@ A secure, minimal, and user-friendly 2FA/TOTP CLI manager for Linux, built with 
 ### 1. Build from source
 Requires [Rust](https://www.rust-lang.org) and Cargo.
 
-git clone https://github.com  
+git clone https://github.com/matheusc457/SafeLocked  
 cd SafeLocked  
 cargo build --release
 
