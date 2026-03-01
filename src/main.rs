@@ -5,7 +5,6 @@ mod totp;
 use chrono::Utc;
 use clap::{Parser, Subcommand};
 use colored::*;
-use rpassword::read_password;
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -35,7 +34,6 @@ enum Commands {
     Lock,
     Add {
         name: String,
-        secret: String,
     },
     List {
         name: Option<String>,
@@ -83,9 +81,12 @@ fn main() {
                 println!("{}", "Error: Vault already exists.".yellow());
                 return;
             }
-            print!("Create Master Password: ");
-            io::stdout().flush().unwrap();
-            let password = read_password().unwrap();
+            let password = rpassword::prompt_password("Create Master Password: ").unwrap();
+            let confirm = rpassword::prompt_password("Confirm Master Password: ").unwrap();
+            if password != confirm {
+                println!("{}", "Error: Passwords do not match.".red().bold());
+                return;
+            }
             let mut salt = [0u8; 16];
             rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut salt);
             let vault = Vault::new(salt);
@@ -107,9 +108,7 @@ fn main() {
                     return;
                 }
             };
-            print!("Enter Master Password: ");
-            io::stdout().flush().unwrap();
-            let password = read_password().unwrap();
+            let password = rpassword::prompt_password("Enter Master Password: ").unwrap();
             let salt: [u8; 16] = data[0..16].try_into().unwrap();
             let key = crypto::derive_key(&password, &salt);
             if crypto::decrypt(&data[16..], &key).is_some() {
@@ -127,7 +126,7 @@ fn main() {
             println!("{}", "Vault locked.".yellow());
         }
 
-        Commands::Add { name, secret } => {
+        Commands::Add { name } => {
             let key = match get_master_key() {
                 Some(k) => k,
                 None => {
@@ -135,11 +134,17 @@ fn main() {
                     return;
                 }
             };
+            let secret = rpassword::prompt_password(format!("Enter TOTP secret for '{}': ", name))
+                .unwrap();
+            if secret.trim().is_empty() {
+                println!("{}", "Error: Secret cannot be empty.".red().bold());
+                return;
+            }
             let data = Vault::load_from_disk().unwrap();
             let mut vault = Vault::deserialize(&crypto::decrypt(&data[16..], &key).unwrap());
             vault.items.push(TwoFactorItem {
                 name: name.clone(),
-                secret,
+                secret: secret.trim().to_string(),
             });
             let encrypted = crypto::encrypt(&vault.serialize(), &key);
             let mut final_data = vault.salt.to_vec();
