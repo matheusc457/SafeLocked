@@ -134,8 +134,8 @@ fn main() {
                     return;
                 }
             };
-            let secret = rpassword::prompt_password(format!("Enter TOTP secret for '{}': ", name))
-                .unwrap();
+            let secret =
+                rpassword::prompt_password(format!("Enter TOTP secret for '{}': ", name)).unwrap();
             if secret.trim().is_empty() {
                 println!("{}", "Error: Secret cannot be empty.".red().bold());
                 return;
