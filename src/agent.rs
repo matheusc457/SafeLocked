@@ -45,8 +45,7 @@ fn send_command(command: &str) -> Option<String> {
 /// Asks the agent for the master key.
 pub fn get_master_key() -> Option<[u8; 32]> {
     let response = send_command("GET_KEY")?;
-    if response.starts_with("OK ") {
-        let key_hex = &response[3..];
+    if let Some(key_hex) = response.strip_prefix("OK ") {
         let key_vec = hex::decode(key_hex).ok()?;
         key_vec.try_into().ok()
     } else {
@@ -149,7 +148,6 @@ pub fn save_vault(vault: &Vault, key: &[u8; 32]) {
     let encrypted = crypto::encrypt(&vault.serialize(), key);
     let mut final_data = vault.salt.to_vec();
     final_data.extend(encrypted);
-    vault
-        .save_to_disk(&final_data)
-        .expect("Failed to save vault");
+    vault.save_to_disk(&final_data).expect("Failed to save vault");
 }
+
