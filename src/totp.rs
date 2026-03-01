@@ -57,6 +57,6 @@ mod tests {
     #[test]
     fn test_remaining_seconds_in_range() {
         let secs = get_remaining_seconds();
-        assert!(secs >= 1 && secs <= 30);
+        assert!((1..=30).contains(&secs));
     }
 }
