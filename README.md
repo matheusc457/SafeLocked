@@ -1,4 +1,4 @@
-# SafeLocked 🔐
+# SafeLocked
 
 A secure 2FA/TOTP CLI manager for Linux, built with Rust.
 
@@ -11,8 +11,8 @@ A secure 2FA/TOTP CLI manager for Linux, built with Rust.
 ## Installation
 Requires Rust and Cargo.
 
-git clone https://github.com
-cd SafeLocked
+git clone https://github.com  
+cd SafeLocked  
 cargo build --release
 
 ## Security
