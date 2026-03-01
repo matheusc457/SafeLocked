@@ -1,8 +1,10 @@
 # SafeLocked
 
+![CI](https://github.com/matheusc457/SafeLocked/actions/workflows/ci.yml/badge.svg)
+
 SafeLocked is a secure and minimal TOTP (2FA) CLI manager for Linux, written in Rust.
 
-The project focuses on local-first security. Authentication secrets are stored encrypted on disk and are only accessible during temporary in-memory sessions. SafeLocked operates fully offline and avoids cloud dependency by design.
+The project follows a local-first security model. Authentication secrets are encrypted at rest and are only accessible during temporary in-memory sessions. SafeLocked works fully offline and avoids cloud dependency by design.
 
 ---
 
@@ -11,6 +13,7 @@ The project focuses on local-first security. Authentication secrets are stored e
 - AES-256-GCM encryption for vault protection  
 - Argon2id key derivation  
 - Time-limited unlock sessions  
+- Default unlock session: **60 seconds**  
 - Session keys stored only in RAM (`/dev/shm`)  
 - No decrypted secrets written to disk  
 - Fully offline operation  
@@ -20,6 +23,7 @@ The project focuses on local-first security. Authentication secrets are stored e
 ## Installation
 
 ### Requirements
+
 - Linux
 - Rust and Cargo
 
@@ -60,7 +64,7 @@ Unlock vault (default session: **60 seconds**):
 safelocked unlock
 ```
 
-Unlock for a custom duration:
+Unlock with custom timeout:
 
 ```bash
 safelocked unlock --timeout 300
@@ -78,7 +82,7 @@ List active codes:
 safelocked list
 ```
 
-Lock immediately:
+Lock vault immediately:
 
 ```bash
 safelocked lock
