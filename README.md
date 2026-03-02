@@ -25,7 +25,7 @@ The project follows a local-first security model. Authentication secrets are enc
 
 ### Requirements
 
-- Linux or Termux (Android)
+- Linux
 - Rust and Cargo
 
 ### Build
