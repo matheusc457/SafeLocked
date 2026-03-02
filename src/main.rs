@@ -26,16 +26,27 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Init,
+
     Unlock,
+
     Lock,
+
     Status,
+
     Add { name: String },
+
     List { name: Option<String> },
+
     Rename { name: String, new_name: String },
+
     Remove { name: String },
+
     Watch { name: String },
+
     Export { path: PathBuf },
+
     Import,
+
     Purge,
 }
 
@@ -381,7 +392,10 @@ fn main() {
                     let export_path = path.with_extension("slbackup");
                     let json = vault.serialize();
                     let encrypted = crypto::encrypt(&json, &key);
-                    std::fs::write(&export_path, &encrypted).expect("Failed to write export file");
+                    if let Err(e) = std::fs::write(&export_path, &encrypted) {
+                        println!("{} Could not write file: {}", "Error:".red().bold(), e);
+                        return;
+                    }
                     println!(
                         "{} Backup saved to '{}'.",
                         "Success:".green().bold(),
@@ -412,8 +426,10 @@ fn main() {
                         return;
                     }
                     let export_path = path.with_extension("json");
-                    std::fs::write(&export_path, vault.serialize())
-                        .expect("Failed to write export file");
+                    if let Err(e) = std::fs::write(&export_path, vault.serialize()) {
+                        println!("{} Could not write file: {}", "Error:".red().bold(), e);
+                        return;
+                    }
                     println!(
                         "{} Plain JSON saved to '{}'. Keep it safe!",
                         "Success:".green().bold(),
