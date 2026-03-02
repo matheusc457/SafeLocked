@@ -409,7 +409,7 @@ fn main() {
                     } else {
                         path.clone()
                     };
-                    std::fs::write(&export_path, &vault.serialize())
+                    std::fs::write(&export_path, vault.serialize())
                         .expect("Failed to write export file");
                     println!(
                         "{} Plain JSON saved to '{}'. Keep it safe!",
