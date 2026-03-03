@@ -2,31 +2,27 @@ use std::time::SystemTime;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 pub fn generate_code(secret_str: &str) -> Option<String> {
-    // Try base32 decode first (standard TOTP secret format).
-    // If the length mod 8 == 1 or decode fails, fall back to raw bytes.
-    let secret_bytes = {
-        let rem = secret_str.len() % 8;
-        let padded = if rem == 0 || rem == 1 {
-            secret_str.to_string()
-        } else {
-            format!("{}{}", secret_str, "=".repeat(8 - rem))
-        };
-        match Secret::Encoded(padded).to_bytes() {
-            Ok(b) => b,
-            Err(_) => Secret::Raw(secret_str.as_bytes().to_vec())
-                .to_bytes()
-                .ok()?,
-        }
-    };
-
-    if secret_bytes.is_empty() {
+    if secret_str.is_empty() {
         return None;
     }
 
-    let totp = match TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes) {
-        Ok(t) => t,
-        Err(_) => return None,
+    // Try base32 decode (standard TOTP format).
+    // Fall back to raw bytes if decode fails for any reason.
+    let secret_bytes = {
+        let upper = secret_str.to_uppercase();
+        let rem = upper.len() % 8;
+        let padded = if rem == 0 {
+            upper.clone()
+        } else {
+            format!("{}{}", upper, "=".repeat(8 - rem))
+        };
+        match Secret::Encoded(padded).to_bytes() {
+            Ok(b) if !b.is_empty() => b,
+            _ => secret_str.as_bytes().to_vec(),
+        }
     };
+
+    let totp = TOTP::new_unchecked(Algorithm::SHA1, 6, 1, 30, secret_bytes);
 
     let time = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
