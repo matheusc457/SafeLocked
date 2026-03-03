@@ -13,7 +13,7 @@ use storage::{TwoFactorItem, Vault};
 #[derive(Parser)]
 #[command(name = "lockbox")]
 #[command(author = "Matheus <://github.com>")]
-#[command(version = "2.0.0")]
+#[command(version = "2.1.0")]
 #[command(
     about = "Secure 2FA/TOTP manager for Linux terminal",
     long_about = "LockBox protects your seeds with AES-256-GCM. \nUse 'unlock' to access your codes."
@@ -85,14 +85,32 @@ enum Commands {
         name: String,
     },
 
-    /// Watch a TOTP code update in real time
+    /// Watch TOTP codes update in real time
     ///
+    /// Watch a single service or all services at once with --all.
     /// Press Ctrl+C to exit.
-    /// Example: lockbox watch Google
+    /// Examples: lockbox watch Google / lockbox watch --all
     Watch {
-        /// Name of the service to watch
+        /// Name of the service to watch (ignored if --all is set)
+        name: Option<String>,
+        /// Watch all services at once
+        #[arg(long)]
+        all: bool,
+    },
+
+    /// Edit the secret of an existing service
+    ///
+    /// The new secret is entered interactively and never exposed in shell history.
+    /// Example: lockbox edit Google
+    Edit {
+        /// Name of the service to edit
         name: String,
     },
+
+    /// Sort all services alphabetically
+    ///
+    /// Example: lockbox sort
+    Sort,
 
     /// Export the vault to a backup file
     ///
@@ -397,50 +415,102 @@ fn main() {
             }
         }
 
-        Commands::Watch { name } => {
+        Commands::Watch { name, all } => {
             let key = match get_key_or_exit() {
                 Some(k) => k,
                 None => return,
             };
-            println!("Watching {} (Ctrl+C to exit)...", name.cyan().bold());
-            loop {
-                if !agent::is_agent_running() {
-                    println!("\n{}", "Vault locked. Exiting watch.".red().bold());
-                    break;
-                }
-                let vault = match agent::load_vault(&key) {
-                    Some(v) => v,
-                    None => break,
-                };
-                if let Some(item) = vault
-                    .items
-                    .iter()
-                    .find(|i| i.name.to_lowercase() == name.to_lowercase())
-                {
-                    let raw_code = totp::generate_code(&item.secret).unwrap_or_default();
-                    let code = format_code(&raw_code);
+
+            if all {
+                println!("Watching all services (Ctrl+C to exit)...");
+                loop {
+                    if !agent::is_agent_running() {
+                        println!("\n{}", "Vault locked. Exiting watch.".red().bold());
+                        break;
+                    }
+                    let vault = match agent::load_vault(&key) {
+                        Some(v) => v,
+                        None => break,
+                    };
+                    if vault.items.is_empty() {
+                        println!("{}", "No services found.".yellow());
+                        break;
+                    }
                     let secs = totp::get_remaining_seconds();
                     let time_color = if secs <= 7 {
                         secs.to_string().red()
                     } else {
                         secs.to_string().green()
                     };
-                    print!(
-                        "\rService: {:<15} Code: {:<10} Time: {:<5}s\x1B[K",
-                        item.name.cyan(),
-                        code.white().bold(),
-                        time_color
-                    );
+                    // Move cursor up to overwrite previous output
+                    if vault.items.len() > 1 {
+                        print!("\x1B[{}A", vault.items.len());
+                    }
+                    for item in &vault.items {
+                        let raw_code =
+                            totp::generate_code(&item.secret).unwrap_or_else(|| "ERR".to_string());
+                        let code = format_code(&raw_code);
+                        println!(
+                            "\r{:<20} {:<10} {}s\x1B[K",
+                            item.name.cyan(),
+                            code.white().bold(),
+                            time_color
+                        );
+                    }
                     io::stdout().flush().unwrap();
-                } else {
-                    println!(
-                        "\n{} Service '{}' not found.",
-                        "Error:".red().bold(),
-                        name.cyan()
-                    );
-                    break;
+                    thread::sleep(Duration::from_millis(500));
                 }
-                thread::sleep(Duration::from_millis(500));
+            } else {
+                let name = match name {
+                    Some(n) => n,
+                    None => {
+                        println!(
+                            "{} Provide a service name or use --all.",
+                            "Error:".red().bold()
+                        );
+                        return;
+                    }
+                };
+                println!("Watching {} (Ctrl+C to exit)...", name.cyan().bold());
+                loop {
+                    if !agent::is_agent_running() {
+                        println!("\n{}", "Vault locked. Exiting watch.".red().bold());
+                        break;
+                    }
+                    let vault = match agent::load_vault(&key) {
+                        Some(v) => v,
+                        None => break,
+                    };
+                    if let Some(item) = vault
+                        .items
+                        .iter()
+                        .find(|i| i.name.to_lowercase() == name.to_lowercase())
+                    {
+                        let raw_code = totp::generate_code(&item.secret).unwrap_or_default();
+                        let code = format_code(&raw_code);
+                        let secs = totp::get_remaining_seconds();
+                        let time_color = if secs <= 7 {
+                            secs.to_string().red()
+                        } else {
+                            secs.to_string().green()
+                        };
+                        print!(
+                            "\rService: {:<15} Code: {:<10} Time: {:<5}s\x1B[K",
+                            item.name.cyan(),
+                            code.white().bold(),
+                            time_color
+                        );
+                        io::stdout().flush().unwrap();
+                    } else {
+                        println!(
+                            "\n{} Service '{}' not found.",
+                            "Error:".red().bold(),
+                            name.cyan()
+                        );
+                        break;
+                    }
+                    thread::sleep(Duration::from_millis(500));
+                }
             }
         }
 
@@ -641,6 +711,64 @@ fn main() {
                 "Success:".green().bold(),
                 added.to_string().green(),
                 skipped.to_string().yellow()
+            );
+        }
+
+        Commands::Edit { name } => {
+            let key = match get_key_or_exit() {
+                Some(k) => k,
+                None => return,
+            };
+            let mut vault = match load_vault_or_exit(&key) {
+                Some(v) => v,
+                None => return,
+            };
+            if let Some(item) = vault
+                .items
+                .iter_mut()
+                .find(|i| i.name.to_lowercase() == name.to_lowercase())
+            {
+                let new_secret =
+                    rpassword::prompt_password(format!("New TOTP secret for '{}': ", name))
+                        .unwrap();
+                if new_secret.trim().is_empty() {
+                    println!("{}", "Error: Secret cannot be empty.".red().bold());
+                    return;
+                }
+                item.secret = new_secret.trim().to_string();
+                agent::save_vault(&vault, &key);
+                println!(
+                    "{} Secret for '{}' updated.",
+                    "Success:".green().bold(),
+                    name.cyan().bold()
+                );
+            } else {
+                println!(
+                    "{} Service '{}' not found.",
+                    "Error:".red().bold(),
+                    name.cyan()
+                );
+            }
+        }
+
+        Commands::Sort => {
+            let key = match get_key_or_exit() {
+                Some(k) => k,
+                None => return,
+            };
+            let mut vault = match load_vault_or_exit(&key) {
+                Some(v) => v,
+                None => return,
+            };
+            vault
+                .items
+                .sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+            let count = vault.items.len();
+            agent::save_vault(&vault, &key);
+            println!(
+                "{} {} services sorted alphabetically.",
+                "Success:".green().bold(),
+                count.to_string().cyan()
             );
         }
 
