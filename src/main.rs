@@ -4,6 +4,7 @@ mod storage;
 mod totp;
 
 use clap::{Parser, Subcommand};
+use clipboard::{ClipboardContext, ClipboardProvider};
 use colored::*;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -111,6 +112,15 @@ enum Commands {
     /// Existing services with the same name are skipped automatically.
     /// Example: lockbox import
     Import,
+
+    /// Copy a TOTP code to the clipboard
+    ///
+    /// The clipboard is automatically cleared after 30 seconds.
+    /// Example: lockbox copy Google
+    Copy {
+        /// Name of the service to copy the code from
+        name: String,
+    },
 
     /// Delete the vault and stop the agent permanently
     ///
@@ -633,6 +643,55 @@ fn main() {
                 added.to_string().green(),
                 skipped.to_string().yellow()
             );
+        }
+
+        Commands::Copy { name } => {
+            let key = match get_key_or_exit() {
+                Some(k) => k,
+                None => return,
+            };
+            let vault = match load_vault_or_exit(&key) {
+                Some(v) => v,
+                None => return,
+            };
+            if let Some(item) = vault
+                .items
+                .iter()
+                .find(|i| i.name.to_lowercase() == name.to_lowercase())
+            {
+                let raw_code = totp::generate_code(&item.secret).unwrap_or_default();
+                let code = format_code(&raw_code);
+                let plain_code = raw_code.clone();
+                let mut ctx: ClipboardContext = match ClipboardProvider::new() {
+                    Ok(c) => c,
+                    Err(_) => {
+                        println!("{} Could not access clipboard.", "Error:".red().bold());
+                        return;
+                    }
+                };
+                if ctx.set_contents(plain_code).is_err() {
+                    println!("{} Failed to copy to clipboard.", "Error:".red().bold());
+                    return;
+                }
+                println!(
+                    "{} Code {} for '{}' copied to clipboard. Clears automatically in 30 seconds.",
+                    "Success:".green().bold(),
+                    code.white().bold(),
+                    item.name.cyan()
+                );
+                thread::spawn(move || {
+                    thread::sleep(Duration::from_secs(30));
+                    if let Ok(mut ctx) = ClipboardContext::new() {
+                        let _ = ctx.set_contents(String::new());
+                    }
+                });
+            } else {
+                println!(
+                    "{} Service '{}' not found.",
+                    "Error:".red().bold(),
+                    name.cyan()
+                );
+            }
         }
 
         Commands::Purge => {
