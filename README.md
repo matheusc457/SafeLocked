@@ -6,6 +6,8 @@
 
 LockBox follows a local-first security model. Authentication secrets are encrypted at rest and only accessible during active agent sessions. Works fully offline with no cloud dependency.
 
+> **Note:** This project is currently in maintenance mode. No new features are planned for now. Pull requests are welcome and appreciated — if you have an idea, feel free to open one!
+
 ---
 
 ## Features
@@ -17,6 +19,7 @@ LockBox follows a local-first security model. Authentication secrets are encrypt
 - No decrypted secrets ever written to disk
 - TOTP secrets never exposed in shell history
 - Copy TOTP code directly to clipboard — clears automatically in 30 seconds
+- Watch all codes updating in real time with `watch --all`
 - Encrypted backup and restore via `export` and `import`
 - Supports any TOTP secret format used in practice
 - X11 and Wayland support
@@ -58,9 +61,12 @@ lockbox add Google              # Add a new service (secret entered interactivel
 lockbox list                    # List all TOTP codes
 lockbox list Google             # Filter by name
 lockbox watch Google            # Watch a code update in real time
+lockbox watch --all             # Watch all codes update in real time
 lockbox copy Google             # Copy code to clipboard (clears in 30s)
+lockbox edit Google             # Edit the secret of an existing service
 lockbox rename Google Gmail     # Rename a service
 lockbox remove Google           # Remove a service
+lockbox sort                    # Sort all services alphabetically
 lockbox export ~/backup         # Export vault (encrypted or plain JSON)
 lockbox import                  # Import from backup
 lockbox lock                    # Lock vault and stop agent
@@ -99,13 +105,15 @@ LockBox is designed for personal use on a trusted device. All protections hold a
 
 ## Contributing
 
-Contributions are welcome! To contribute:
+This project is currently in maintenance mode and is not actively receiving new features. However, contributions are welcome and appreciated!
+
+If you have a bug fix, improvement or new idea:
 
 1. Fork the repository
-2. Create a branch for your feature or fix (`git checkout -b feat/my-feature`)
+2. Create a branch (`git checkout -b feat/my-feature`)
 3. Run `cargo fmt` and `cargo clippy` before committing
 4. Make sure all tests pass: `cargo test`
-5. Open a Pull Request describing what you changed and why
+5. Open a Pull Request — it will be reviewed with care
 
 ---
 
