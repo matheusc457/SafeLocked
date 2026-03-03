@@ -16,8 +16,10 @@ LockBox follows a local-first security model. Authentication secrets are encrypt
 - Agent session persists until explicit `lock` command
 - No decrypted secrets ever written to disk
 - TOTP secrets never exposed in shell history
+- Copy TOTP code directly to clipboard — clears automatically in 30 seconds
 - Encrypted backup and restore via `export` and `import`
 - Supports any TOTP secret format used in practice
+- X11 and Wayland support
 - Fully offline operation
 
 ---
@@ -49,19 +51,20 @@ lockbox --help
 ## Usage
 
 ```bash
-lockbox init              # Initialize a new vault
-lockbox unlock            # Unlock and start background agent
-lockbox status            # Check if vault is unlocked
-lockbox add Google        # Add a new service (secret entered interactively)
-lockbox list              # List all TOTP codes
-lockbox list Google       # Filter by name
-lockbox watch Google      # Watch a code update in real time
-lockbox rename Google Gmail  # Rename a service
-lockbox remove Google     # Remove a service
-lockbox export ~/backup   # Export vault (encrypted or plain JSON)
-lockbox import            # Import from backup
-lockbox lock              # Lock vault and stop agent
-lockbox purge             # Delete vault permanently
+lockbox init                    # Initialize a new vault
+lockbox unlock                  # Unlock and start background agent
+lockbox status                  # Check if vault is unlocked
+lockbox add Google              # Add a new service (secret entered interactively)
+lockbox list                    # List all TOTP codes
+lockbox list Google             # Filter by name
+lockbox watch Google            # Watch a code update in real time
+lockbox copy Google             # Copy code to clipboard (clears in 30s)
+lockbox rename Google Gmail     # Rename a service
+lockbox remove Google           # Remove a service
+lockbox export ~/backup         # Export vault (encrypted or plain JSON)
+lockbox import                  # Import from backup
+lockbox lock                    # Lock vault and stop agent
+lockbox purge                   # Delete vault permanently
 ```
 
 > Run `lockbox <command> --help` for detailed information about any command.
@@ -78,13 +81,15 @@ LockBox uses multiple layers of protection:
 
 **32-byte random salt** ensures two users with the same password produce completely different keys, eliminating precomputed dictionary attacks.
 
-**Background agent** holds the master key exclusively in RAM, never written to disk. Destroyed immediately when you run `lock`.
+**Background agent** holds the master key exclusively in RAM. Never written to disk. Destroyed immediately when you run `lock`.
 
 **Unix socket with 600 permissions** restricts agent access to your user only.
 
 **Vault file with 600 permissions** ensures the encrypted file is only readable by your user.
 
 **Interactive secret prompt** prevents TOTP secrets from appearing in shell history or system logs.
+
+**Clipboard auto-clear** removes copied codes from the clipboard after 30 seconds.
 
 ### Threat model
 
@@ -98,14 +103,9 @@ Contributions are welcome! To contribute:
 
 1. Fork the repository
 2. Create a branch for your feature or fix (`git checkout -b feat/my-feature`)
-3. Make your changes and run `cargo fmt` and `cargo clippy` before committing
-4. Open a Pull Request describing what you changed and why
-
-Please make sure all tests pass before submitting:
-
-```bash
-cargo test
-```
+3. Run `cargo fmt` and `cargo clippy` before committing
+4. Make sure all tests pass: `cargo test`
+5. Open a Pull Request describing what you changed and why
 
 ---
 
