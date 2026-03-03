@@ -4,7 +4,6 @@ mod storage;
 mod totp;
 
 use clap::{Parser, Subcommand};
-use clipboard::{ClipboardContext, ClipboardProvider};
 use colored::*;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -14,7 +13,7 @@ use storage::{TwoFactorItem, Vault};
 #[derive(Parser)]
 #[command(name = "lockbox")]
 #[command(author = "Matheus <://github.com>")]
-#[command(version = "1.5")]
+#[command(version = "2.0.0")]
 #[command(
     about = "Secure 2FA/TOTP manager for Linux terminal",
     long_about = "LockBox protects your seeds with AES-256-GCM. \nUse 'unlock' to access your codes."
@@ -662,14 +661,14 @@ fn main() {
                 let raw_code = totp::generate_code(&item.secret).unwrap_or_default();
                 let code = format_code(&raw_code);
                 let plain_code = raw_code.clone();
-                let mut ctx: ClipboardContext = match ClipboardProvider::new() {
+                let mut ctx = match arboard::Clipboard::new() {
                     Ok(c) => c,
                     Err(_) => {
                         println!("{} Could not access clipboard.", "Error:".red().bold());
                         return;
                     }
                 };
-                if ctx.set_contents(plain_code).is_err() {
+                if ctx.set_text(plain_code).is_err() {
                     println!("{} Failed to copy to clipboard.", "Error:".red().bold());
                     return;
                 }
@@ -681,8 +680,8 @@ fn main() {
                 );
                 thread::spawn(move || {
                     thread::sleep(Duration::from_secs(30));
-                    if let Ok(mut ctx) = ClipboardContext::new() {
-                        let _ = ctx.set_contents(String::new());
+                    if let Ok(mut ctx) = arboard::Clipboard::new() {
+                        let _ = ctx.set_text(String::new());
                     }
                 });
             } else {
