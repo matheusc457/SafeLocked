@@ -821,12 +821,14 @@ Press Ctrl+C to exit."
                     code.white().bold(),
                     item.name.cyan()
                 );
-                thread::spawn(move || {
+                // On Linux the clipboard is owned by the process.
+                // Fork: parent returns the prompt immediately, child holds the clipboard for 30s.
+                let pid = unsafe { libc::fork() };
+                if pid == 0 {
                     thread::sleep(Duration::from_secs(30));
-                    if let Ok(mut ctx) = arboard::Clipboard::new() {
-                        let _ = ctx.set_text(String::new());
-                    }
-                });
+                    let _ = ctx.set_text(String::new());
+                    std::process::exit(0);
+                }
             } else {
                 println!(
                     "{} Service '{}' not found.",
