@@ -8,10 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
 
 <style>
-/* Base */
 body{
   background:#0a0a0a;
-  color:#00ff9c;
+  color:#00ffb3;
   font-family:"JetBrains Mono", monospace;
   margin:0;
   line-height:1.5;
@@ -19,7 +18,6 @@ body{
   position:relative;
 }
 
-/* Matrix background */
 #matrix-canvas{
   position:fixed;
   top:0;
@@ -29,7 +27,6 @@ body{
   z-index:-1;
 }
 
-/* Header */
 header{
   text-align:center;
   padding:80px 20px;
@@ -37,8 +34,16 @@ header{
 }
 
 h1{ font-size:48px; margin:0; }
-.subtitle{ color:#8affc7; margin-top:10px; }
-.badges{ margin-top:15px; }
+
+.subtitle{
+  color:#8affc7;
+  margin-top:10px;
+}
+
+.badges{
+  margin-top:15px;
+}
+
 .badges span{
   background:#003d2a;
   padding:6px 10px;
@@ -46,42 +51,47 @@ h1{ font-size:48px; margin:0; }
   border-radius:6px;
   display:inline-block;
 }
+
 .buttons{
   margin-top:30px;
   flex-wrap:wrap;
   display:flex;
   justify-content:center;
 }
+
 .buttons a{
   text-decoration:none;
   margin:10px;
   padding:12px 20px;
-  border:1px solid #00ff9c;
-  color:#00ff9c;
+  border:1px solid #00ffb3;
+  color:#00ffb3;
   border-radius:6px;
   transition: all 0.2s;
 }
+
 .buttons a:hover{
-  background:#00ff9c;
+  background:#00ffb3;
   color:#000;
   transform:scale(1.05);
 }
 
-/* Sections */
 section{
   max-width:900px;
   margin:auto;
   padding:60px 20px;
 }
+
 h2{
   border-bottom:1px solid #003d2a;
   padding-bottom:10px;
 }
+
 .features{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap:20px;
 }
+
 .card{
   background:#111;
   padding:20px;
@@ -89,23 +99,22 @@ h2{
   border-radius:8px;
   transition: all 0.2s;
 }
+
 .card:hover{
-  box-shadow: 0 0 15px #00ff9c;
+  box-shadow:0 0 15px #00ffb3;
 }
 
-/* Terminal */
 .terminal{
   background:#000;
   padding:20px;
   border-radius:8px;
   border:1px solid #003d2a;
-  color:#00ff9c;
+  color:#00ffb3;
   white-space:pre-line;
   overflow-x:auto;
   min-height:120px;
 }
 
-/* Footer */
 footer{
   text-align:center;
   padding:40px 20px;
@@ -113,23 +122,28 @@ footer{
   color:#8affc7;
   font-size:14px;
 }
-footer a{ color:#00ff9c; text-decoration:none; }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  h1{ font-size:36px; }
-  .buttons a{ padding:10px 16px; font-size:14px; }
-  section{ padding:40px 15px; }
-  .terminal{ font-size:14px; padding:15px; }
+footer a{
+  color:#00ffb3;
+  text-decoration:none;
 }
-@media (max-width: 480px) {
-  h1{ font-size:28px; }
-  .features{ grid-template-columns: 1fr; }
-  .terminal{ font-size:13px; padding:12px; }
-  .buttons{ flex-direction:column; }
+
+@media (max-width:768px){
+  h1{font-size:36px;}
+  .buttons a{padding:10px 16px;font-size:14px;}
+  section{padding:40px 15px;}
+  .terminal{font-size:14px;padding:15px;}
+}
+
+@media (max-width:480px){
+  h1{font-size:28px;}
+  .features{grid-template-columns:1fr;}
+  .terminal{font-size:13px;padding:12px;}
+  .buttons{flex-direction:column;}
 }
 </style>
 </head>
+
 <body>
 
 <canvas id="matrix-canvas"></canvas>
@@ -156,21 +170,28 @@ footer a{ color:#00ff9c; text-decoration:none; }
 <section>
 <h2>Why LockBox?</h2>
 <p>
-LockBox is designed for users who want a simple, secure and fully offline
-TOTP manager. Your secrets stay on your machine — no cloud services,
-no tracking, no unnecessary complexity.
+LockBox is a minimal and secure CLI tool designed to manage TOTP codes
+entirely offline. Your secrets never leave your machine.
 </p>
 </section>
 
 <section>
 <h2>Features</h2>
+
 <div class="features">
+
 <div class="card">AES-256-GCM encryption</div>
+
 <div class="card">Argon2id key derivation</div>
+
 <div class="card">Background agent with memory-only master key</div>
+
 <div class="card">Clipboard auto-clear</div>
+
 <div class="card">Real-time TOTP watching</div>
+
 <div class="card">Fully offline operation</div>
+
 </div>
 </section>
 
@@ -186,107 +207,159 @@ no tracking, no unnecessary complexity.
 
 <section id="security">
 <h2>Security</h2>
+
 <p>
-LockBox uses modern cryptographic primitives to protect your secrets.
-Vaults are encrypted using AES-256-GCM while the encryption key is
-derived from your master password using Argon2id.
+Vaults are encrypted using AES-256-GCM and the encryption key is derived
+from your master password using Argon2id.
 </p>
+
 <p>
-The master key is stored only in RAM during active sessions via the
-background agent and destroyed immediately when the vault is locked.
+During unlocked sessions the key lives only in RAM through the background
+agent and is destroyed immediately when the vault is locked.
 </p>
+
 </section>
 
 <section id="install">
+
 <h2>Installation</h2>
+
 <div class="terminal">
 git clone https://github.com/matheusc457/LockBox
 cd LockBox
 cargo build --release
 sudo cp target/release/lockbox /usr/local/bin/
 </div>
-</section>
 
-<section>
-<h2>Contributing</h2>
-<p>
-Contributions are welcome. Fork the repository, create a branch,
-run <code>cargo fmt</code> and <code>cargo clippy</code>, ensure all tests
-pass, and open a pull request.
-</p>
 </section>
 
 <footer>
+
 <p>LockBox © 2026</p>
+
 <p>Made with ❤️ by Matheus Campos</p>
+
 <p><a href="https://github.com/matheusc457/LockBox">GitHub Repository</a></p>
-<p>MIT License</p>
+
 </footer>
 
 <script>
-// Matrix effect
-const canvas = document.getElementById("matrix-canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-const letters = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = [];
-for(let x=0;x<columns;x++) drops[x] = 1;
+
+/* MATRIX EFFECT */
+
+const canvas=document.getElementById("matrix-canvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+const letters="abcdefghijklmnopqrstuvwxyz0123456789";
+const fontSize=16;
+
+const columns=canvas.width/fontSize;
+const drops=[];
+
+for(let x=0;x<columns;x++) drops[x]=1;
+
 function draw(){
-  ctx.fillStyle="rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#00ff9c";
-  ctx.font=fontSize+"px JetBrains Mono";
-  for(let i=0;i<columns;i++){
-    const text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-    drops[i]++;
-    if(drops[i]*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
-  }
+
+ctx.fillStyle="rgba(0,0,0,0.08)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#008f5a";
+ctx.font=fontSize+"px JetBrains Mono";
+
+for(let i=0;i<columns;i++){
+
+const text=letters[Math.floor(Math.random()*letters.length)];
+
+ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+drops[i]++;
+
+if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
+drops[i]=0;
+
 }
+
+}
+
 setInterval(draw,50);
 
-// Terminal TOTP animation
-const quickstartEl = document.getElementById("terminal-quickstart");
-const cliEl = document.getElementById("terminal-cli");
 
-const quickstartLines = [
-"$ lockbox init\nInitialize a new encrypted vault",
-"$ lockbox unlock\nStart the background agent",
-"$ lockbox add GitHub\nAdd a new service",
-"$ lockbox watch --all\nWatch all TOTP codes update in real time"
+/* TERMINAL ANIMATION */
+
+const quickstartEl=document.getElementById("terminal-quickstart");
+
+const cliEl=document.getElementById("terminal-cli");
+
+const quickstartLines=[
+"$ lockbox init",
+"Initialize encrypted vault",
+
+"$ lockbox unlock",
+"Start background agent",
+
+"$ lockbox add GitHub",
+"Add new service",
+
+"$ lockbox watch --all",
+"Watch all TOTP codes"
 ];
 
-const cliLines = [
-"$ lockbox unlock\nVault unlocked. Agent running.",
-"$ lockbox list\n\nGitHub     482193\nGoogle     993104\nDiscord    118420",
-"$ lockbox copy GitHub\nCode copied to clipboard (clears in 30s)"
+const cliLines=[
+"$ lockbox unlock",
+"Vault unlocked",
+
+"$ lockbox list",
+
+"GitHub   482193",
+"Google   993104",
+"Discord  118420",
+
+"$ lockbox copy GitHub",
+"Copied to clipboard"
 ];
 
-function animateTerminal(lines, el, delay=800){
-  let i=0;
-  function loop(){
-    if(i<lines.length){
-      el.textContent += lines[i]+"\n\n";
-      i++;
-      setTimeout(loop, delay);
-    }
-  }
-  loop();
+function animateTerminal(lines,el,delay=900){
+
+let i=0;
+
+function loop(){
+
+if(i<lines.length){
+
+el.textContent+=lines[i]+"\n";
+
+i++;
+
+setTimeout(loop,delay);
+
 }
-animateTerminal(quickstartLines, quickstartEl, 1200);
-animateTerminal(cliLines, cliEl, 1500);
 
-// GitHub stars counter
+}
+
+loop();
+
+}
+
+animateTerminal(quickstartLines,quickstartEl);
+
+animateTerminal(cliLines,cliEl,1200);
+
+
+/* GITHUB STARS */
+
 fetch("https://api.github.com/repos/matheusc457/LockBox")
+
 .then(res=>res.json())
+
 .then(data=>{
-  const starsEl = document.getElementById("stars");
-  starsEl.textContent = "⭐ " + data.stargazers_count + " Stars";
-})
-.catch(()=>{console.log("Could not load stars")});
+
+document.getElementById("stars").textContent="⭐ "+data.stargazers_count+" Stars";
+
+});
+
 </script>
 
 </body>
